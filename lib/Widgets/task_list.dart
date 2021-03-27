@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todoey/Widgets/task_tile.dart';
-import 'package:todoey/models/task.dart';
+import 'package:todoey/models/task_data.dart';
 
-class TaskList extends StatefulWidget {
-  final List<Task> tasks;
-  TaskList({this.tasks});
-  @override
-  _TaskListState createState() => _TaskListState();
-}
-
-class _TaskListState extends State<TaskList> {
+class TaskList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 14.0),
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            return TaskTile(
-              name: widget.tasks[index].name,
-              isChecked: widget.tasks[index].isChecked,
-              toggleCheckBox: (checkedState) {
-                setState(() {
-                  widget.tasks[index].toggleDone();
-                });
-              },
-            );
-          },
-          itemCount: widget.tasks.length,
-        ),
+        child: Consumer<TaskData>(builder: (
+          context,
+          taskData,
+          child,
+        ) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              final currentTask = taskData.tasks[index];
+              return TaskTile(
+                name: currentTask.name,
+                isChecked: currentTask.isChecked,
+                toggleCheckBox: (checkedState) {
+                  taskData.updateTask(currentTask);
+                },
+                deleteTaskCallBack: () {
+                  taskData.deleteTask(currentTask);
+                },
+              );
+            },
+            itemCount: context.watch<TaskData>().taskCount,
+          );
+        }),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
